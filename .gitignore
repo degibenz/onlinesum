@@ -1,0 +1,6 @@
+env/
+
+*.iml
+
+.idea/
+sum-online.paw
