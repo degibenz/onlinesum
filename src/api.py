@@ -45,23 +45,14 @@ class Vote(View):
         data = await self.request.json()
         session = Session(pk=self.request.client.get('_id'))
 
-        try:
-            await session.vote(data.get('number'))
-        except(Exception,) as error:
-            web_logger.error(error)
-            traceback.print_exc()
+        await session.vote(data.get('number'))
 
-        try:
-            future = asyncio.Future()
-            math = MathResults()
+        future = asyncio.Future()
+        math = MathResults()
 
-            asyncio.ensure_future(math.math_all_selected_number(future, self.request.app['websockets']))
+        asyncio.ensure_future(math.math_all_selected_number(future, self.request.app['websockets']))
 
-            future.add_done_callback(notify_to_sockets)
-
-        except(Exception,) as error:
-            web_logger.error(error)
-            traceback.print_exc()
+        future.add_done_callback(notify_to_sockets)
 
         return json_response(
             {'status': True}
@@ -77,8 +68,6 @@ def notify_to_sockets(future):
 
 
 async def send_message(future, socket, message):
-    try:
+    if not socket.closed:
         socket.send_str(data=message)
         future.set_result(True)
-    except(Exception,):
-        pass
